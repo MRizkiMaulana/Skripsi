@@ -1,0 +1,15 @@
+proxies:
+  - name: Game1
+    server: 4.lowh.net
+    port: 443
+    type: trojan
+    password: UUID (isi punya sendiri)
+    skip-cert-verify: true
+    sni: shopee.id
+    network: ws
+    ws-opts:
+      path: /welcome
+      headers:
+        Host: shopee.id
+    udp: true
+    interface-name: eth1

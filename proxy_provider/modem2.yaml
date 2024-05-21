@@ -1,0 +1,32 @@
+proxies:
+  - name: Server1Modem2
+    server: 002.htmlcdn.net
+    port: 443
+    type: trojan
+    password: UUID (isi punya sendiri)
+    skip-cert-verify: true
+    sni: shopee.id
+    network: ws
+    ws-opts:
+      path: /welcome
+      headers:
+        Host: shopee.id
+    udp: true
+    interface-name: eth2
+  - name: Server2Modem2
+    server: 001.htmlcdn.net
+    port: 443
+    type: vmess
+    uuid: UUID (isi punya sendiri)
+    alterId: 0
+    cipher: auto
+    tls: true
+    skip-cert-verify: true
+    servername: shopee.id
+    network: ws
+    ws-opts:
+      path: /hello
+      headers:
+        Host: shopee.id
+    udp: true
+    interface-name: eth2

@@ -1,0 +1,18 @@
+proxies:
+  - name: Remote2
+    server: cbtp.xmbb.net
+    port: 443
+    type: vmess
+    uuid: UUID (isi punya sendiri)
+    alterId: 0
+    cipher: auto
+    tls: true
+    skip-cert-verify: true
+    servername: shopee.id
+    network: ws
+    ws-opts:
+      path: /hello
+      headers:
+        Host: shopee.id
+    udp: true
+    interface-name: eth2

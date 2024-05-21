@@ -1,0 +1,217 @@
+---
+rule-providers:
+  Rule-Direct:
+    type: file
+    behavior: classical
+    path: "./rule_provider/port-game.yaml"
+  Rule-Reject:
+    type: file
+    behavior: classical
+    path: "./rule_provider/reject.yaml"
+    format: yaml
+  Rule-Umum:
+    type: file
+    behavior: classical
+    path: "./rule_provider/umum.yaml"
+    format: yaml
+  Rule-Game:
+    type: file
+    behavior: classical
+    path: "./rule_provider/gaming.yaml"
+    format: yaml
+  Zerotier:
+    type: file
+    behavior: classical
+    path: "./rule_provider/zerotier.yaml"
+    format: text
+proxy-providers:
+  Zerotier1:
+    type: file
+    path: "./proxy_provider/zerotier1.yaml"
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+  Zerotier2:
+    type: file
+    path: "./proxy_provider/zerotier2.yaml"
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+  Game1:
+    type: file
+    path: "./proxy_provider/game1.yaml"
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+  Game2:
+    type: file
+    path: "./proxy_provider/game2.yaml"
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+  Modem1:
+    type: file
+    path: "./proxy_provider/modem1.yaml"
+    health-check:
+      enable: true
+      url: https://cp.cloudflare.com/generate_204
+      interval: 300
+  Modem2:
+    type: file
+    path: "./proxy_provider/modem2.yaml"
+    health-check:
+      enable: true
+      url: https://cp.cloudflare.com/generate_204
+      interval: 300
+proxy-groups:
+- name: ZerotierModem1
+  type: url-test
+  disable-udp: true
+  use:
+  - Zerotier1
+  url: http://cp.cloudflare.com/generate_204
+  interval: '300'
+  tolerance: '150'
+  interface-name: eth1
+- name: ZerotierModem2
+  type: url-test
+  disable-udp: true
+  use:
+  - Zerotier2
+  url: http://cp.cloudflare.com/generate_204
+  interval: '300'
+  tolerance: '150'
+  interface-name: eth2
+- name: Zerotier
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - ZerotierModem1
+  - ZerotierModem2
+  url: http://cp.cloudflare.com/generate_204
+  interval: '300'
+- name: GameModem1
+  type: url-test
+  disable-udp: true
+  use:
+  - Game1
+  url: http://cp.cloudflare.com/generate_204
+  interval: '300'
+  tolerance: '150'
+  interface-name: eth1
+- name: GameModem2
+  type: url-test
+  disable-udp: true
+  use:
+  - Game2
+  url: http://cp.cloudflare.com/generate_204
+  interval: '300'
+  tolerance: '150'
+  interface-name: eth2
+- name: Gaming
+  type: load-balance
+  strategy: round-robin
+  disable-udp: true
+  proxies:
+  - GameModem1
+  - GameModem2
+  url: http://cp.cloudflare.com/generate_204
+  interval: '300'
+- name: MODEM1
+  type: url-test
+  disable-udp: true
+  use:
+  - Modem1
+  url: https://cp.cloudflare.com/generate_204
+  interval: '150'
+  tolerance: '150'
+  interface-name: eth1
+- name: MODEM2
+  type: url-test
+  disable-udp: true
+  use:
+  - Modem2
+  url: https://cp.cloudflare.com/generate_204
+  interval: '150'
+  tolerance: '150'
+  interface-name: eth2
+- name: DUALMODEM
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - MODEM1
+  - MODEM2
+  url: https://cp.cloudflare.com/generate_204
+  interval: '300'
+dns:
+  nameserver:
+  - 192.168.20.1
+  - 192.168.9.1
+  - dhcp://"eth1"
+  - dhcp://"eth2"
+  enable: true
+  ipv6: false
+  enhanced-mode: redir-host
+  fake-ip-range: 198.18.0.1/16
+  listen: 127.0.0.1:7874
+  fake-ip-filter:
+  - "+.*"
+  default-nameserver:
+  - 192.168.20.1
+  - 192.168.9.1
+redir-port: 7892
+tproxy-port: 7895
+port: 7890
+socks-port: 7891
+mixed-port: 7893
+mode: rule
+log-level: silent
+allow-lan: true
+external-controller: 0.0.0.0:8989
+secret: huluhayah
+bind-address: "*"
+external-ui: "/usr/share/openclash/ui"
+ipv6: false
+tun:
+  enable: true
+  stack: system
+  auto-route: false
+  auto-detect-interface: false
+  dns-hijack:
+  - tcp://8.8.8.8:53
+  - tcp://8.8.4.4:53
+profile:
+  store-selected: true
+  store-fake-ip: true
+rules:
+- RULE-SET,Rule-Direct,Gaming
+- RULE-SET,Rule-Umum,DUALMODEM
+- RULE-SET,Rule-Game,Gaming
+- RULE-SET,Zerotier,Zerotier
+- DST-PORT,21,DUALMODEM
+- DST-PORT,22,DUALMODEM
+- DST-PORT,23,DUALMODEM
+- DST-PORT,25,DUALMODEM
+- DST-PORT,80,DUALMODEM
+- DST-PORT,81,DUALMODEM
+- DST-PORT,143,DUALMODEM
+- DST-PORT,443,DUALMODEM
+- DST-PORT,465,DUALMODEM
+- DST-PORT,587,DUALMODEM
+- DST-PORT,993,DUALMODEM
+- DST-PORT,995,DUALMODEM
+- DST-PORT,8000,DUALMODEM
+- DST-PORT,8008,DUALMODEM
+- DST-PORT,8080,DUALMODEM
+- DST-PORT,8081,DUALMODEM
+- DST-PORT,8090,DUALMODEM
+- DST-PORT,8443,DUALMODEM
+- DST-PORT,8888,DUALMODEM
+- MATCH,DUALMODEM
+tcp-concurrent: true
